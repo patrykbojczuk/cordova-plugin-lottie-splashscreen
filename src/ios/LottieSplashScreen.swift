@@ -54,7 +54,7 @@ import Lottie
         if visible {
             let fadeOutDuation = Double(commandDelegate?.settings["LottieFadeOutDuration".lowercased()] as? String ?? "0")!
             if fadeOutDuation > 0 {
-                UIView.animate(withDuration: fadeOutDuation, animations: {
+                UIView.animate(withDuration: (fadeOutDuation / 1000), animations: {
                     self.animationView?.alpha = 0.0
                 }, completion: { _ in
                     self.removeView()
