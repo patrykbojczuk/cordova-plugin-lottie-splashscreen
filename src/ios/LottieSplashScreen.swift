@@ -46,6 +46,10 @@ import Lottie
         }
     }
 
+    private func delayWithMilliseconds(_ milliseconds: Double, completion: @escaping () -> Void) {
+        delayWithSeconds(milliseconds / 1000, completion: completion)
+    }
+
     @objc private func destroyView(_: UITapGestureRecognizer? = nil) {
         if visible {
             let fadeOutDuation = Double(commandDelegate?.settings["LottieFadeOutDuration".lowercased()] as? String ?? "0")!
@@ -98,7 +102,7 @@ import Lottie
 
             let hideTimeout = Double(commandDelegate?.settings["LottieHideTimeout".lowercased()] as? String ?? "0")!
             if hideTimeout > 0 {
-                delayWithSeconds(hideTimeout) {
+                delayWithMilliseconds(hideTimeout) {
                     self.destroyView()
                 }
             }
