@@ -2,6 +2,8 @@ package de.dustplanet.cordova.lottie
 
 import android.R.style
 import android.animation.Animator
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
 import android.app.Dialog
 import android.content.Context
 import android.content.res.Configuration
@@ -9,8 +11,6 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
 import android.webkit.WebView
 import android.widget.ImageView
 import com.airbnb.lottie.LottieAnimationView
@@ -220,17 +220,20 @@ class LottieSplashScreen : CordovaPlugin() {
                 "#ffffff"
             )
         )
-        animationView.setBackgroundColor(color)
 
         val fullScreen = preferences.getBoolean("LottieFullScreen", false)
         splashDialog = Dialog(
             context,
             when {
-                fullScreen -> style.Theme_NoTitleBar_Fullscreen
+                fullScreen -> style.Theme_Translucent_NoTitleBar_Fullscreen
                 else -> style.Theme_Translucent_NoTitleBar
             }
         )
-        splashDialog.window?.setBackgroundDrawable(ColorDrawable(color))
+        val backgroundDrawable = ColorDrawable(color)
+        if(backgroundDrawable.alpha === 255){
+            backgroundDrawable.alpha = 254
+        }
+        splashDialog.window?.setBackgroundDrawable(backgroundDrawable)
         splashDialog.setContentView(animationView)
         splashDialog.setCancelable(false)
     }
@@ -315,20 +318,23 @@ class LottieSplashScreen : CordovaPlugin() {
         val fadeDuration = preferences.getInteger("LottieFadeOutDuration", 0)
         when {
             fadeDuration > 0 -> {
-                val fadeOut = AlphaAnimation(1f, 0f)
+                val fadeOut = ObjectAnimator.ofPropertyValuesHolder(splashDialog.window?.decorView,
+                    PropertyValuesHolder.ofFloat("alpha",
+                        ((splashDialog.window?.decorView?.background?.alpha ?: 254) / 255f), 0f));
                 fadeOut.duration = fadeDuration.toLong()
-                animationView.animation = fadeOut
-                animationView.startAnimation(fadeOut)
-                fadeOut.setAnimationListener(
-                    object : Animation.AnimationListener {
-                        override fun onAnimationStart(animation: Animation?) {}
+                fadeOut.start()
+                fadeOut.addListener(
+                    object: Animator.AnimatorListener {
+                        override fun onAnimationStart(animator: Animator?) {}
 
-                        override fun onAnimationEnd(animation: Animation?) {
+                        override fun onAnimationEnd(animator: Animator?) {
                             splashDialog.dismiss()
                             callbackContext?.success()
                         }
 
-                        override fun onAnimationRepeat(animation: Animation?) {}
+                        override fun onAnimationCancel(animator: Animator?) {}
+
+                        override fun onAnimationRepeat(animator: Animator?) {}
                     }
                 )
             }
