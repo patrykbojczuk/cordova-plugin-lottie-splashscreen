@@ -46,12 +46,16 @@ import Lottie
         }
     }
 
+    private func delayWithMilliseconds(_ milliseconds: Double, completion: @escaping () -> Void) {
+        delayWithSeconds(milliseconds / 1000, completion: completion)
+    }
+
     @objc private func destroyView(_: UITapGestureRecognizer? = nil) {
         if visible {
             let fadeOutDuation = Double(commandDelegate?.settings["LottieFadeOutDuration".lowercased()] as? String ?? "0")!
             if fadeOutDuation > 0 {
-                UIView.animate(withDuration: fadeOutDuation, animations: {
-                    self.animationViewContainer?.alpha = 0.0
+                UIView.animate(withDuration: (fadeOutDuation / 1000), animations: {
+                    self.animationView?.alpha = 0.0
                 }, completion: { _ in
                     self.removeView()
                 })
@@ -98,7 +102,7 @@ import Lottie
 
             let hideTimeout = Double(commandDelegate?.settings["LottieHideTimeout".lowercased()] as? String ?? "0")!
             if hideTimeout > 0 {
-                delayWithSeconds(hideTimeout) {
+                delayWithMilliseconds(hideTimeout) {
                     self.destroyView()
                 }
             }
@@ -115,14 +119,11 @@ import Lottie
         let parentView = viewController.view
         parentView?.isUserInteractionEnabled = false
 
-        animationViewContainer = UIView(frame: (parentView?.bounds)!)
+        animationViewContainer = UIView(frame: (UIScreen.main.bounds))
         animationViewContainer?.layer.zPosition = 1
 
         let backgroundColor = getUIModeDependentPreference(basePreferenceName: "LottieBackgroundColor", defaultValue: "#ffffff")
 
-        animationViewContainer?.autoresizingMask = [
-            .flexibleWidth, .flexibleHeight, .flexibleTopMargin, .flexibleLeftMargin, .flexibleBottomMargin, .flexibleRightMargin
-        ]
         animationViewContainer?.backgroundColor = UIColor(hex: backgroundColor)
     }
 
